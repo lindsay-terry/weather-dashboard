@@ -1,0 +1,16 @@
+:root {
+    --dark: rgb(6, 6, 97);
+    --light: rgb(77, 77, 228);
+    --medium: rgb(28, 28, 112);
+    --ltgray: rgb(192, 190, 190);
+}
+
+header {
+    background-image: linear-gradient(to right, var(--light), var(--medium), var(--dark));
+    color: white;
+}
+
+.custom-btn-clr {
+    background-color: var(--light);
+    color: var(--ltgray);
+}
