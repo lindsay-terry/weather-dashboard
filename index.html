@@ -8,21 +8,21 @@
         <link rel="stylesheet" href="./assets/css/style.css">
     </head>
     <body>
-        <header class="p-2 d-flex justify-content-evenly">
-            <h2 class="p-2 me-5">Weather Dashboard</h2>
+        <header class="p-2 d-flex justify-content-end">
+            <h2 class="p-2">Weather Dashboard</h2>
         </header>
-        <main class="border container-fluid">
+        <main class="container-fluid">
             <div class="row">
-                <aside class="border-bottom col-3 d-flex flex-column">
-                    <div class="d-flex flex-column">
+                <aside class="col-3 d-flex flex-column">
+                    <div class="d-flex flex-column border-bottom border-secondary">
                         <h3 class="my-2" style="font-weight: bold;">Search for a City:</h3>
                         <label for="city-search" title="city-search" >
-                            <input type="text" class="my-1 form-control" aria-label="city search input" id="city-search" placeholder="San Diego">
+                            <input type="text" class="my-1 form-control rounded border-dark" aria-label="city search input" id="city-search" placeholder="San Diego">
                         </label>
                         <button class="btn btn-primary custom-btn-clr my-2" type="button" id="search-btn">Search</button>
                     </div>
                     <div class="d-flex flex-column" id="searched-cities">
-
+                     
                     </div>
 
                 </aside>

@@ -10,6 +10,10 @@ header {
     color: white;
 }
 
+header h2 {
+    margin-right: 25%;
+}
+
 .custom-btn-clr {
     background-color: var(--light);
     color: var(--ltgray);
