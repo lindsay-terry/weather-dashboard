@@ -1,7 +1,19 @@
 const apiKey = '719c2dfe147062ea694d78525a1c7e25';
 const searchBtn = document.getElementById('search-btn');
 
+//local storage functions
+let savedCities = JSON.parse(localStorage.getItem('savedCities')) ||[];
 
+function readCityStorage() {
+    let savedCities = JSON.parse(localStorage.getItem('savedCities')) ||[];
+    return savedCities;
+}
+
+function saveCityStorage() {
+    localStorage.setItem('savedCities', JSON.stringify(savedCities));
+}
+
+//fetch functions
 function getLatLon() {
     const userInput = document.getElementById('city-search');
     const citySearched = userInput.value;
@@ -22,6 +34,7 @@ function getLatLon() {
 }
 
 function getCurrentWeather(data) {
+    readCityStorage();
     const currentDate = dayjs();
     const weatherApi = `https://api.openweathermap.org/data/2.5/weather?lat=${data[0].lat}&lon=${data[0].lon}&appid=${apiKey}&units=imperial`;
     
@@ -32,6 +45,9 @@ function getCurrentWeather(data) {
     .then(function(weather) {
         // console.log(weather);
         displayCurrentWeather(weather);
+        savedCities.push(weather.name);
+        saveCityStorage(savedCities);
+        
     })
     .catch(function(error) {
         console.log('Error');
@@ -93,8 +109,25 @@ function displayCurrentWeather(weather) {
 
 }
 
+function displaySavedCities() {
+    const searchedList = document.getElementById('searched-cities');
+    searchedList.innerHTML = '';
+    readCityStorage();
+    for (let i = 0; i < savedCities.length; i++) {
+        const searchedCityBtn = document.createElement('button');
+        searchedCityBtn.setAttribute('class', 'btn btn-secondary my-2');
+        searchedCityBtn.textContent = savedCities[i];
+
+        searchedList.appendChild(searchedCityBtn);
+    }
+}
 
 searchBtn.addEventListener("click", function(event) {
+    readCityStorage();
+    if (savedCities.length > 0) {
+        displaySavedCities();
+    }
     event.preventDefault();
     getLatLon();
+
 })
