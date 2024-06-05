@@ -26,7 +26,7 @@ function getLatLon() {
     })
     .then(function(data) {
         getCurrentWeather(data);
-        // getForecast(data);
+        getForecast(data);
     })
     .catch(function(error) {
         console.log('Error');
@@ -35,7 +35,6 @@ function getLatLon() {
 
 function getCurrentWeather(data) {
     readCityStorage();
-    const currentDate = dayjs();
     const weatherApi = `https://api.openweathermap.org/data/2.5/weather?lat=${data[0].lat}&lon=${data[0].lon}&appid=${apiKey}&units=imperial`;
     
     fetch(weatherApi) 
@@ -54,20 +53,61 @@ function getCurrentWeather(data) {
     })
 }
 
-// function getForecast(data) {
-//     const forecastApi = `https://api.openweathermap.org/data/2.5/forecast?lat=${data[0].lat}&lon=${data[0].lon}&cnt=5&appid=${apiKey}&units=imperial`;
+function getForecast(data) {
+    const forecastApi = `https://api.openweathermap.org/data/2.5/forecast?lat=${data[0].lat}&lon=${data[0].lon}&appid=${apiKey}&units=imperial`;
 
-//     fetch(forecastApi)
-//     .then(function(response) {
-//         return response.json();
-//     })
-//     .then(function(forecast) {
-//         console.log(forecast);
-//     })
-//     .catch(function(error) {
-//         console.log('Error');
-//     })
-// }
+    fetch(forecastApi)
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(forecast) {
+        displayForecast(forecast);
+    })
+    .catch(function(error) {
+        console.log('Error');
+    })
+}
+
+function displayForecast(forecast) {
+    const currentTime = dayjs().format('HH');
+    const list = forecast.list;
+    const forecastDiv = document.getElementById('forecast');
+
+    let filteredTimes;
+    //Function to check current time against the time blocks of 3 that the API returns results in and 
+    //choose closest time block
+    if (currentTime === '00') {
+        filteredTimes = list.filter(item => item.dt_txt.includes('00:00'));
+    } else {
+        const timeBlock = Math.floor(parseInt(currentTime)/3) *3;
+        filteredTimes = list.filter(item => item.dt_txt.includes(`${timeBlock.toString().padStart(2, '0')}:00`))
+    }
+    // displayForecast(filteredTimes);
+    console.log(filteredTimes);
+
+    const fiveDayHeader = document.createElement('h4');
+    const fiveDayDiv = document.createElement('div');
+
+    fiveDayHeader.textContent = "5 Day Forecast:";
+    fiveDayDiv.setAttribute('class', 'd-flex m-2 p2');
+
+    forecastDiv.appendChild(fiveDayHeader);
+    forecastDiv.appendChild(fiveDayDiv);
+
+
+    filteredTimes.forEach(entry => {
+        const forecastCard = document.createElement('div');
+        const dateHeader = document.createElement('h5');
+
+        dateHeader.textContent = dayjs(entry.dt_txt).format('MM/DD/YYYY');
+
+        forecastCard.appendChild(dateHeader);
+        
+        fiveDayDiv.appendChild(forecastCard);
+    }) 
+
+    
+}
 
 function displayCurrentWeather(weather) {
     const currentWeather = document.getElementById('current-weather');
@@ -106,6 +146,7 @@ function displayCurrentWeather(weather) {
     currentStats.appendChild(windP);
     currentStats.appendChild(humidityP);
     currentWeather.appendChild(currentWeatherDiv);
+    displaySavedCities();
 
 }
 
@@ -122,11 +163,25 @@ function displaySavedCities() {
     }
 }
 
+// function displayForecast(filteredTimes) {
+//     console.log(filteredTimes);
+//     const forecastDiv = document.getElementById('forecast');
+//     forecastDiv.innerHTML = '';
+
+//     const forecastHeader = document.createElementById('h4');
+//     forecastHeader.textContent = '5 Day Forecast';
+
+//     forecastDiv.appendChild(forecastHeader);
+
+//     filteredTimes.forEach(date => {
+//         console.log(date.main.temp);
+//     })
+
+// }
+
 searchBtn.addEventListener("click", function(event) {
     readCityStorage();
-    if (savedCities.length > 0) {
-        displaySavedCities();
-    }
+    // displaySavedCities();
     event.preventDefault();
     getLatLon();
 
