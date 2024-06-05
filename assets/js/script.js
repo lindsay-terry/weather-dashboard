@@ -94,14 +94,31 @@ function displayForecast(forecast) {
     forecastDiv.appendChild(fiveDayHeader);
     forecastDiv.appendChild(fiveDayDiv);
 
-
+    //create and render cards for 5 day forecast
     filteredTimes.forEach(entry => {
         const forecastCard = document.createElement('div');
         const dateHeader = document.createElement('h5');
+        const icon = document.createElement('img');
+        const temp = document.createElement('p');
+        const wind = document.createElement('p');
+        const humidity = document.createElement('p');
+
+        forecastCard.setAttribute('class', 'card mx-4 p-3 custom-card');
+        // forecastCard.setAttribute('style', 'background-color: --var(dark); color: white;')
+        icon.setAttribute('src', `https://openweathermap.org/img/wn/${entry.weather[0].icon}@2x.png`)
+        icon.setAttribute('alt', `${entry.weather[0].icon} weather icon`);
+        icon.setAttribute('style', 'height: 50px; width: 50px;');
 
         dateHeader.textContent = dayjs(entry.dt_txt).format('MM/DD/YYYY');
+        temp.textContent = `Temp: ${entry.main.temp}\u00B0F`;
+        wind.textContent = `Wind: ${entry.wind.speed} MPH`;
+        humidity.textContent = `Humidity: ${entry.main.humidity}%`;
 
         forecastCard.appendChild(dateHeader);
+        forecastCard.appendChild(icon);
+        forecastCard.appendChild(temp);
+        forecastCard.appendChild(wind);
+        forecastCard.appendChild(humidity);
         
         fiveDayDiv.appendChild(forecastCard);
     }) 

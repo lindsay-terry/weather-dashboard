@@ -18,3 +18,8 @@ header h2 {
     background-color: var(--light);
     color: var(--ltgray);
 }
+
+.custom-card {
+    background-color: var(--dark);
+    color: white;
+}
