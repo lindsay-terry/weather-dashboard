@@ -1,5 +1,6 @@
 const apiKey = '719c2dfe147062ea694d78525a1c7e25';
 const searchBtn = document.getElementById('search-btn');
+const searchedCities = document.getElementById('searched-cities');
 
 //local storage functions
 let savedCities = JSON.parse(localStorage.getItem('savedCities')) ||[];
@@ -14,9 +15,17 @@ function saveCityStorage() {
 }
 
 //fetch functions
-function getLatLon() {
+function getLatLon(searchAgain) {
+    console.log(searchAgain);
     const userInput = document.getElementById('city-search');
-    const citySearched = userInput.value;
+    let citySearched;
+   //Check to see if data from the button is being passed in or using user input
+    if (!searchAgain) {
+        citySearched = userInput.value;
+    } else {
+        citySearched = searchAgain;
+    }
+    
 
     const geoApi = `http://api.openweathermap.org/geo/1.0/direct?q=${citySearched}&limit=1&appid=${apiKey}`;
 
@@ -27,6 +36,7 @@ function getLatLon() {
     .then(function(data) {
         getCurrentWeather(data);
         getForecast(data);
+        userInput.value = '';
     })
     .catch(function(error) {
         console.log('Error');
@@ -44,8 +54,13 @@ function getCurrentWeather(data) {
     .then(function(weather) {
         // console.log(weather);
         displayCurrentWeather(weather);
-        savedCities.push(weather.name);
+        //checks to see if city exists in previously searched citites
+        if (!savedCities.includes(weather.name)) {
+            savedCities.push(weather.name);
+        }
         saveCityStorage(savedCities);
+        //displays saved cities buttons
+        displaySavedCities();
         
     })
     .catch(function(error) {
@@ -72,6 +87,7 @@ function displayForecast(forecast) {
     const currentTime = dayjs().format('HH');
     const list = forecast.list;
     const forecastDiv = document.getElementById('forecast');
+    forecastDiv.innerHTML = '';
 
     let filteredTimes;
     //Function to check current time against the time blocks of 3 that the API returns results in and 
@@ -163,7 +179,7 @@ function displayCurrentWeather(weather) {
     currentStats.appendChild(windP);
     currentStats.appendChild(humidityP);
     currentWeather.appendChild(currentWeatherDiv);
-    displaySavedCities();
+    // displaySavedCities();
 
 }
 
@@ -180,26 +196,20 @@ function displaySavedCities() {
     }
 }
 
-// function displayForecast(filteredTimes) {
-//     console.log(filteredTimes);
-//     const forecastDiv = document.getElementById('forecast');
-//     forecastDiv.innerHTML = '';
-
-//     const forecastHeader = document.createElementById('h4');
-//     forecastHeader.textContent = '5 Day Forecast';
-
-//     forecastDiv.appendChild(forecastHeader);
-
-//     filteredTimes.forEach(date => {
-//         console.log(date.main.temp);
-//     })
-
-// }
-
+//Event listener to search for cities
 searchBtn.addEventListener("click", function(event) {
     readCityStorage();
     // displaySavedCities();
     event.preventDefault();
     getLatLon();
 
+})
+
+//Event listener for previously searched cities
+searchedCities.addEventListener('click', function(event) {
+    if (event.target.classList.contains('btn-secondary')) {
+        const searchAgain = event.target.textContent;
+        getLatLon(searchAgain);
+    }
+    
 })
