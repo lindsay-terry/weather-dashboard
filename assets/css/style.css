@@ -20,6 +20,6 @@ header h2 {
 }
 
 .custom-card {
-    background-color: var(--dark);
+    background-color: rgb(50, 50, 78);
     color: white;
 }

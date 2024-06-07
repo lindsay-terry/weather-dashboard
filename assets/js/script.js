@@ -14,9 +14,8 @@ function saveCityStorage() {
     localStorage.setItem('savedCities', JSON.stringify(savedCities));
 }
 
-//fetch functions
+//fetch functions:
 function getLatLon(searchAgain) {
-    console.log(searchAgain);
     const userInput = document.getElementById('city-search');
     let citySearched;
    //Check to see if data from the button is being passed in or using user input
@@ -26,7 +25,7 @@ function getLatLon(searchAgain) {
         citySearched = searchAgain;
     }
     
-
+    //GeoApi to get coordinates based on searched city
     const geoApi = `http://api.openweathermap.org/geo/1.0/direct?q=${citySearched}&limit=1&appid=${apiKey}`;
 
     fetch(geoApi)
@@ -34,6 +33,7 @@ function getLatLon(searchAgain) {
         return response.json();
     })
     .then(function(data) {
+        //passes result into fetch requests to get current weather and forecast
         getCurrentWeather(data);
         getForecast(data);
         userInput.value = '';
@@ -43,6 +43,7 @@ function getLatLon(searchAgain) {
     })
 }
 
+//fetch request using latitude and longitude to pass into current weather api
 function getCurrentWeather(data) {
     readCityStorage();
     const weatherApi = `https://api.openweathermap.org/data/2.5/weather?lat=${data[0].lat}&lon=${data[0].lon}&appid=${apiKey}&units=imperial`;
@@ -52,9 +53,9 @@ function getCurrentWeather(data) {
         return response.json();
     })
     .then(function(weather) {
-        // console.log(weather);
         displayCurrentWeather(weather);
         //checks to see if city exists in previously searched citites
+        //to avoid having duplicates in list
         if (!savedCities.includes(weather.name)) {
             savedCities.push(weather.name);
         }
@@ -68,6 +69,7 @@ function getCurrentWeather(data) {
     })
 }
 
+//fetch request using latitude and longitude to pass into forecast api
 function getForecast(data) {
     const forecastApi = `https://api.openweathermap.org/data/2.5/forecast?lat=${data[0].lat}&lon=${data[0].lon}&appid=${apiKey}&units=imperial`;
 
@@ -83,35 +85,43 @@ function getForecast(data) {
     })
 }
 
+//function to display 5 day forecast
 function displayForecast(forecast) {
-    const currentTime = dayjs().format('HH');
     const list = forecast.list;
+    //Find date/time to reference what time forecasts should be pulled  
+    const date = (dayjs(list[0].dt_txt).add(forecast.city.timezone, 'second')).format('HH');
     const forecastDiv = document.getElementById('forecast');
     forecastDiv.innerHTML = '';
-
+    
     let filteredTimes;
-    //Function to check current time against the time blocks of 3 that the API returns results in and 
-    //choose closest time block
-    if (currentTime === '00') {
+    // checks current time against the time blocks of 3 that the API returns results in and 
+    // choose closest time block
+    if (date === '00:00') {
         filteredTimes = list.filter(item => item.dt_txt.includes('00:00'));
     } else {
-        const timeBlock = Math.floor(parseInt(currentTime)/3) *3;
+        const timeBlock = Math.round(parseInt(date)/3) *3;
         filteredTimes = list.filter(item => item.dt_txt.includes(`${timeBlock.toString().padStart(2, '0')}:00`))
+        console.log(filteredTimes);
     }
-    // displayForecast(filteredTimes);
-    console.log(filteredTimes);
+    // const list = forecast.list;
+
+    // let time = (dayjs(list.dt).add(forecast.city.timezone, 'second')).format('HH');
+    // console.log(time);
+    // const filteredTimes = list.filter(item => item.dt_txt.includes('12:00'));
+    // console.log(filteredTimes);
 
     const fiveDayHeader = document.createElement('h4');
     const fiveDayDiv = document.createElement('div');
 
     fiveDayHeader.textContent = "5 Day Forecast:";
-    fiveDayDiv.setAttribute('class', 'd-flex m-2 p2');
+    fiveDayDiv.setAttribute('class', 'd-flex flex-wrap m-2 p2 justify-content-evenly');
 
     forecastDiv.appendChild(fiveDayHeader);
     forecastDiv.appendChild(fiveDayDiv);
 
     //create and render cards for 5 day forecast
     filteredTimes.forEach(entry => {
+        console.log(entry);
         const forecastCard = document.createElement('div');
         const dateHeader = document.createElement('h5');
         const icon = document.createElement('img');
@@ -120,9 +130,8 @@ function displayForecast(forecast) {
         const humidity = document.createElement('p');
 
         forecastCard.setAttribute('class', 'card mx-4 p-3 custom-card');
-        // forecastCard.setAttribute('style', 'background-color: --var(dark); color: white;')
         icon.setAttribute('src', `https://openweathermap.org/img/wn/${entry.weather[0].icon}@2x.png`)
-        icon.setAttribute('alt', `${entry.weather[0].icon} weather icon`);
+        icon.setAttribute('alt', `${entry.weather[0].description} weather icon`);
         icon.setAttribute('style', 'height: 50px; width: 50px;');
 
         dateHeader.textContent = dayjs(entry.dt_txt).format('MM/DD/YYYY');
@@ -138,15 +147,14 @@ function displayForecast(forecast) {
         
         fiveDayDiv.appendChild(forecastCard);
     }) 
-
-    
 }
 
+//Creates a div to store current weather information and displays all current
+//weather information for searched city
 function displayCurrentWeather(weather) {
     const currentWeather = document.getElementById('current-weather');
     currentWeather.innerHTML = '';
 
-    //border around current weather for user-entered city
     currentWeather.setAttribute('class', 'border border-dark p-2 m-2');
     const currentWeatherDiv = document.createElement('div');
     const nameRow = document.createElement('div');
@@ -179,10 +187,9 @@ function displayCurrentWeather(weather) {
     currentStats.appendChild(windP);
     currentStats.appendChild(humidityP);
     currentWeather.appendChild(currentWeatherDiv);
-    // displaySavedCities();
-
 }
 
+//Display a list of citites previously searched as buttons
 function displaySavedCities() {
     const searchedList = document.getElementById('searched-cities');
     searchedList.innerHTML = '';
@@ -196,10 +203,13 @@ function displaySavedCities() {
     }
 }
 
+//calls function to display saved cities so they persist on refresh
+readCityStorage();
+displaySavedCities();
+
 //Event listener to search for cities
 searchBtn.addEventListener("click", function(event) {
     readCityStorage();
-    // displaySavedCities();
     event.preventDefault();
     getLatLon();
 
@@ -211,5 +221,4 @@ searchedCities.addEventListener('click', function(event) {
         const searchAgain = event.target.textContent;
         getLatLon(searchAgain);
     }
-    
 })
