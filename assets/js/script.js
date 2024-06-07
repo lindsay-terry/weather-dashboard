@@ -87,41 +87,32 @@ function getForecast(data) {
 
 //function to display 5 day forecast
 function displayForecast(forecast) {
-    const list = forecast.list;
-    //Find date/time to reference what time forecasts should be pulled  
-    const date = (dayjs(list[0].dt_txt).add(forecast.city.timezone, 'second')).format('HH');
     const forecastDiv = document.getElementById('forecast');
     forecastDiv.innerHTML = '';
-    
-    let filteredTimes;
-    // checks current time against the time blocks of 3 that the API returns results in and 
-    // choose closest time block
-    if (date === '00:00') {
-        filteredTimes = list.filter(item => item.dt_txt.includes('00:00'));
-    } else {
-        const timeBlock = Math.round(parseInt(date)/3) *3;
-        filteredTimes = list.filter(item => item.dt_txt.includes(`${timeBlock.toString().padStart(2, '0')}:00`))
-        console.log(filteredTimes);
-    }
-    // const list = forecast.list;
 
-    // let time = (dayjs(list.dt).add(forecast.city.timezone, 'second')).format('HH');
-    // console.log(time);
-    // const filteredTimes = list.filter(item => item.dt_txt.includes('12:00'));
-    // console.log(filteredTimes);
-
+    //Set up container and header for 5 day forecasts to render
     const fiveDayHeader = document.createElement('h4');
     const fiveDayDiv = document.createElement('div');
-
+    
     fiveDayHeader.textContent = "5 Day Forecast:";
     fiveDayDiv.setAttribute('class', 'd-flex flex-wrap m-2 p2 justify-content-evenly');
 
     forecastDiv.appendChild(fiveDayHeader);
     forecastDiv.appendChild(fiveDayDiv);
 
-    //create and render cards for 5 day forecast
-    filteredTimes.forEach(entry => {
-        console.log(entry);
+    //Find first midday index in results from fetch
+    let midday; 
+    for (i = 0; i < 8; i++) {
+        let hour = (dayjs(forecast.list[i].dt_txt).add(forecast.city.timezone, 'second')).format('HH');
+        if (hour >= 12 && hour <=14) {midday = i;}
+    }
+
+    //find all midday indexes 
+    for (i =0; i <5; i++) {
+        let index = i * 8 + midday;
+        let date = (dayjs(forecast.list[index].dt_txt).add(forecast.city.timezone, 'second')).format('MM/DD/YYYY');
+    
+    //create and render cards for 5 day forecast using each index pulled from loop to find midday hours
         const forecastCard = document.createElement('div');
         const dateHeader = document.createElement('h5');
         const icon = document.createElement('img');
@@ -130,14 +121,15 @@ function displayForecast(forecast) {
         const humidity = document.createElement('p');
 
         forecastCard.setAttribute('class', 'card mx-4 p-3 custom-card');
-        icon.setAttribute('src', `https://openweathermap.org/img/wn/${entry.weather[0].icon}@2x.png`)
-        icon.setAttribute('alt', `${entry.weather[0].description} weather icon`);
+        
+        icon.setAttribute('src', `https://openweathermap.org/img/wn/${forecast.list[index].weather[0].icon}@2x.png`)
+        icon.setAttribute('alt', `${forecast.list[index].weather[0].description} weather icon`);
         icon.setAttribute('style', 'height: 50px; width: 50px;');
 
-        dateHeader.textContent = dayjs(entry.dt_txt).format('MM/DD/YYYY');
-        temp.textContent = `Temp: ${entry.main.temp}\u00B0F`;
-        wind.textContent = `Wind: ${entry.wind.speed} MPH`;
-        humidity.textContent = `Humidity: ${entry.main.humidity}%`;
+        dateHeader.textContent = dayjs(forecast.list[index].dt_txt).format('MM/DD/YYYY');
+        temp.textContent = `Temp: ${forecast.list[index].main.temp}\u00B0F`;
+        wind.textContent = `Wind: ${forecast.list[index].wind.speed} MPH`;
+        humidity.textContent = `Humidity: ${forecast.list[index].main.humidity}%`;
 
         forecastCard.appendChild(dateHeader);
         forecastCard.appendChild(icon);
@@ -146,7 +138,7 @@ function displayForecast(forecast) {
         forecastCard.appendChild(humidity);
         
         fiveDayDiv.appendChild(forecastCard);
-    }) 
+    }
 }
 
 //Creates a div to store current weather information and displays all current
