@@ -26,7 +26,7 @@ function getLatLon(searchAgain) {
     }
     
     //GeoApi to get coordinates based on searched city
-    const geoApi = `http://api.openweathermap.org/geo/1.0/direct?q=${citySearched}&limit=1&appid=${apiKey}`;
+    const geoApi = `https://api.openweathermap.org/geo/1.0/direct?q=${citySearched}&limit=1&appid=${apiKey}`;
 
     fetch(geoApi)
     .then(function(response) {
